@@ -1,0 +1,2 @@
+import React from 'react';import './ScenariosPage.css';
+export default function ScenariosPage({scenarios,setPage}){return <div className="scenario-grid">{scenarios.map((s,i)=><article key={s.id}><div className="scenario-code">SCN-{String(i+1).padStart(2,'0')}</div><div className="scenario-icon">{s.id==='rcp'?'◉':s.id==='pressure'?'↟':s.id==='sg'?'≈':'ϟ'}</div><small>{s.category}</small><h3>{s.title}</h3><p>{s.description}</p><div><span>{s.level}</span><button onClick={()=>setPage('create')}>Использовать →</button></div></article>)}</div>}

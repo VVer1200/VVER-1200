@@ -1,0 +1,2 @@
+import React from 'react';import './TelemetryCard.css';
+export default function TelemetryCard({label,value,unit,range,state='normal'}){return <div className={`telemetry-card ${state}`}><div className="telemetry-label"><span>{label}</span><i/></div><div className="telemetry-value">{value}<small>{unit}</small></div><div className="telemetry-range">{range}</div><div className="signal-bar"><b/><b/><b/><b/><b/></div></div>}

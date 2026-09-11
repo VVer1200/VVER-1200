@@ -1,0 +1,9 @@
+{
+  "short_name": "VVER Trainer",
+  "name": "Тренажер оператора энергоблока ВВЭР-1200",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#08121d",
+  "background_color": "#07111b"
+}

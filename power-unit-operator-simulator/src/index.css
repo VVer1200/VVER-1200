@@ -1,0 +1,1 @@
+*{box-sizing:border-box}html,body,#root{margin:0;min-height:100%;font-family:Inter,"Segoe UI",Arial,sans-serif;background:#07111b;color:#e6eef6}body{min-width:1024px}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #4bb9cc;outline-offset:2px}::selection{background:#2b8aa6;color:white}
