@@ -1,0 +1,33 @@
+{
+  "name": "vver1200-simulation-engine",
+  "version": "1.0.0",
+  "description": "Reduced-order deterministic mathematical simulation engine for VVER-1200 educational simulator",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/server.ts",
+    "server": "tsx src/server.ts",
+    "simulation:test": "tsx src/validation/run-tests.ts",
+    "simulation:demo": "tsx src/cli/demo.ts",
+    "simulation:export": "tsx src/cli/export-csv.ts",
+    "TEST:SERVER": "tsx src/TEST_SERVER.ts"
+  },
+  "keywords": [
+    "vver-1200",
+    "nuclear-simulation",
+    "reactor-physics",
+    "thermohydraulics",
+    "reduced-order"
+  ],
+  "author": "Antigravity Simulation Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/ws": "^8.18.1",
+    "ws": "^8.21.3"
+  }
+}
