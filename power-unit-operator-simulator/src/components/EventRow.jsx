@@ -1,0 +1,2 @@
+import React from 'react';import './EventRow.css';import {typeLabel} from '../utils/formatters';
+export default function EventRow({event}){const code={student:'OP',instructor:'IN',alarm:'!',system:'SYS'}[event.type];return <div className={`event-row ${event.type}`}><span className="event-code">{code}</span><div><b>{event.text}</b><small>{typeLabel(event.type)}</small></div><time>{event.time}</time></div>}
