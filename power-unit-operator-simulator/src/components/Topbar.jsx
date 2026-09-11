@@ -1,7 +1,15 @@
 import React from 'react';
 import './Topbar.css';
 
-export default function Topbar({ title, subtitle }) {
+export default function Topbar({ title, subtitle, connectionStatus = 'disconnected' }) {
+  const statusInfo = {
+    connected: ['Энергоблок ВВЭР-1200 в сети', 'Телеметрия в реальном времени (20 Гц)'],
+    connecting: ['Подключение к симулятору...', 'Ожидание ответа WebSocket (порт 3000)'],
+    disconnected: ['Симулятор не подключен', 'Запустите сервер симулятора (порт 3000)'],
+  };
+
+  const [stateText, stateSub] = statusInfo[connectionStatus] || statusInfo.disconnected;
+
   return (
     <header className="topbar">
       <div className="topbar-copy">
@@ -11,10 +19,10 @@ export default function Topbar({ title, subtitle }) {
       </div>
       <div className="top-right">
         <div className="plant-state">
-          <span />
+          <span className={connectionStatus} />
           <div>
-            <b>Энергоблок в учебном режиме</b>
-            <small>Телеметрия обновляется в реальном времени</small>
+            <b>{stateText}</b>
+            <small>{stateSub}</small>
           </div>
         </div>
         <div className="instructor-mark">ИН</div>

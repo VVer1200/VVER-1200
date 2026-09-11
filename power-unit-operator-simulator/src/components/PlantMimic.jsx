@@ -12,42 +12,50 @@ function FlowArrow({ label, steam = false }) {
 }
 
 export default function PlantMimic({ telemetry }) {
+  const rcpStates = telemetry.rcpStates || [true, true, true, true];
+  const isScram = telemetry.scramActive;
+  const isGridOff = telemetry.gridBreakerClosed === false;
+  const isTurbineTripped = telemetry.turbineStopValvesOpen === false;
+
   return (
     <div className="mimic">
       <div className="mimic-title">УПРОЩЕННАЯ ТЕХНОЛОГИЧЕСКАЯ СХЕМА ЭНЕРГОБЛОКА</div>
       <div className="mimic-chain">
-        <div className="unit reactor">
+        <div className={`unit reactor ${isScram ? 'scram' : ''}`}>
           <span>РЕАКТОР</span>
           <b>{telemetry.power}%</b>
-          <i>ВВЭР-1200</i>
+          <i>{isScram ? 'АЗ-1 СРАБОТАЛА' : 'ВВЭР-1200'}</i>
         </div>
         <FlowArrow label="I КОНТУР" />
         <div className="unit sg">
           <span>ПАРОГЕНЕРАТОР</span>
           <b>{telemetry.sgLevel} м</b>
-          <i>уровень</i>
+          <i>{telemetry.secondaryPressure ? `${telemetry.secondaryPressure} МПа` : 'уровень'}</i>
         </div>
         <FlowArrow label="ПАР" steam />
-        <div className="unit turbine">
+        <div className={`unit turbine ${isTurbineTripped ? 'offline' : ''}`}>
           <span>ТУРБИНА</span>
           <b>{telemetry.rpm}</b>
-          <i>об/мин</i>
+          <i>{isTurbineTripped ? 'СК ПОСАЖЕНЫ' : 'об/мин'}</i>
         </div>
         <FlowArrow label="ВАЛ" />
-        <div className="unit generator">
+        <div className={`unit generator ${isGridOff ? 'offline' : ''}`}>
           <span>ГЕНЕРАТОР</span>
           <b>{telemetry.electric}</b>
-          <i>МВт</i>
+          <i>{isGridOff ? 'СЕТЬ ОТКЛЮЧЕНА' : 'МВт'}</i>
         </div>
       </div>
       <div className="pump-strip">
-        {[1, 2, 3, 4].map((number) => (
-          <div className={number === 2 ? 'pump off' : 'pump'} key={number}>
-            <i />
-            <b>{`ГЦН-${number}`}</b>
-            <span>{number === 2 ? 'ОТКЛЮЧЕН' : 'РАБОТА'}</span>
-          </div>
-        ))}
+        {[1, 2, 3, 4].map((number) => {
+          const isOff = rcpStates[number - 1] === false;
+          return (
+            <div className={isOff ? 'pump off' : 'pump'} key={number}>
+              <i />
+              <b>{`ГЦН-${number}`}</b>
+              <span>{isOff ? 'ОТКЛЮЧЕН' : 'РАБОТА'}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
