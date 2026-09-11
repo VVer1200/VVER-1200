@@ -10,6 +10,7 @@ import ResultsPage from './pages/ResultsPage';
 import ScenariosPage from './pages/ScenariosPage';
 import { operators, scenarios, initialJournal, results } from './data/mockData';
 import { nowTime } from './utils/formatters';
+import simulatorService from './services/simulatorService';
 
 const titles = {
   dashboard: ['Главная', 'Текущие показатели энергоблока и состояние учебной сессии'],
@@ -30,13 +31,26 @@ const initialSession = {
 };
 
 const initialTelemetry = {
-  power: 92.6,
-  primaryPressure: 16.14,
-  outletTemp: 326.8,
-  sgLevel: 2.31,
-  electric: 1089,
+  power: 100.0,
+  powerMW: 3200.0,
+  primaryPressure: 16.20,
+  outletTemp: 328.9,
+  inletTemp: 298.2,
+  deltaT: 30.7,
+  sgLevel: 2.40,
+  secondaryPressure: 7.00,
+  electric: 1190,
   rpm: 3000,
   freq: 50.0,
+  flowPrimKgS: 17600,
+  levelPzrM: 8.52,
+  rcpStates: [true, true, true, true],
+  rcpCountActive: 4,
+  scramActive: false,
+  turbineStopValvesOpen: true,
+  gridBreakerClosed: true,
+  lamps: {},
+  isRealData: false,
 };
 
 export default function App() {
@@ -48,6 +62,7 @@ export default function App() {
     () => JSON.parse(localStorage.getItem('vver-session') || 'null') || initialSession
   );
   const [telemetry, setTelemetry] = useState(initialTelemetry);
+  const [connectionStatus, setConnectionStatus] = useState('connecting');
 
   useEffect(() => {
     localStorage.setItem('vver-journal', JSON.stringify(journal));
@@ -57,18 +72,38 @@ export default function App() {
     localStorage.setItem('vver-session', JSON.stringify(session));
   }, [session]);
 
+  // Подключение к серверу симулятора ВВЭР-1200 и подписка на события
+  useEffect(() => {
+    simulatorService.connect();
+
+    const unsubTelemetry = simulatorService.onTelemetry((realTel) => {
+      setTelemetry(realTel);
+    });
+
+    const unsubStatus = simulatorService.onStatusChange((status) => {
+      setConnectionStatus(status);
+    });
+
+    const unsubAlarm = simulatorService.onAlarm(({ text }) => {
+      setJournal((current) => [
+        ...current,
+        { time: nowTime(), type: 'alarm', text: `Сигнализация БЩУ: ${text}` },
+      ]);
+    });
+
+    return () => {
+      unsubTelemetry();
+      unsubStatus();
+      unsubAlarm();
+    };
+  }, []);
+
+  // Таймер учебной сессии
   useEffect(() => {
     if (!session.active) return undefined;
 
     const timer = setInterval(() => {
       setSession((current) => ({ ...current, elapsed: current.elapsed + 1 }));
-      setTelemetry((current) => ({
-        ...current,
-        power: +(current.power + (Math.random() - 0.5) * 0.08).toFixed(2),
-        primaryPressure: +(current.primaryPressure + (Math.random() - 0.5) * 0.01).toFixed(2),
-        outletTemp: +(current.outletTemp + (Math.random() - 0.5) * 0.05).toFixed(1),
-        sgLevel: +(current.sgLevel + (Math.random() - 0.5) * 0.01).toFixed(2),
-      }));
     }, 1000);
 
     return () => clearInterval(timer);
@@ -83,11 +118,14 @@ export default function App() {
 
   const startSession = (data) => {
     setSession({ ...data, active: true, elapsed: 0 });
+    // Сброс математической модели в исходное состояние для новой сессии
+    simulatorService.resetSim();
+
     setJournal([
       {
         time: nowTime(),
         type: 'system',
-        text: `${data.mode} запущен. Включена полная фиксация событий учебной сессии.`,
+        text: `${data.mode} запущен. Подключение к математической модели энергоблока активно.`,
       },
     ]);
     setPage('live');
@@ -101,9 +139,13 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar page={page} setPage={setPage} />
+      <Sidebar page={page} setPage={setPage} connectionStatus={connectionStatus} />
       <div className="main-area">
-        <Topbar title={titles[page][0]} subtitle={titles[page][1]} />
+        <Topbar
+          title={titles[page][0]}
+          subtitle={titles[page][1]}
+          connectionStatus={connectionStatus}
+        />
         <main className="content">
           {page === 'dashboard' && (
             <DashboardPage
@@ -113,6 +155,7 @@ export default function App() {
               journal={journal}
               telemetry={telemetry}
               setPage={setPage}
+              connectionStatus={connectionStatus}
             />
           )}
           {page === 'create' && (

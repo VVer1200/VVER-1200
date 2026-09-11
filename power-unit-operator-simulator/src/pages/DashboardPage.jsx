@@ -7,24 +7,65 @@ import PlantMimic from '../components/PlantMimic';
 import TelemetryCard from '../components/TelemetryCard';
 import { formatTime } from '../utils/formatters';
 
-export default function DashboardPage({ session, operator, scenario, journal, telemetry, setPage }) {
+export default function DashboardPage({ session, operator, scenario, journal, telemetry, setPage, connectionStatus = 'disconnected' }) {
+  const freqFormatted = typeof telemetry.freq === 'number' ? telemetry.freq.toFixed(2) : (telemetry.freq || '50.00');
+
   return (
     <>
       <div className="section-title">
         <div>
           <h2>Текущее состояние энергоблока</h2>
-          <p>Основные технологические параметры учебной модели ВВЭР-1200</p>
+          <p>
+            {connectionStatus === 'connected'
+              ? 'Математическая модель ВВЭР-1200 подключена · частота обновления 20 Гц'
+              : 'Основные технологические параметры учебной модели ВВЭР-1200'}
+          </p>
         </div>
         <button className="primary" onClick={() => setPage('create')}>＋ ЗАПЛАНИРОВАТЬ СЕССИЮ</button>
       </div>
 
       <div className="dashboard-telemetry">
-        <TelemetryCard label="Мощность реактора" value={telemetry.power} unit="%" range="Рабочий диапазон 95–105%" state={telemetry.power < 95 ? 'warning' : 'normal'} />
-        <TelemetryCard label="Давление I контура" value={telemetry.primaryPressure} unit="МПа" range="Норма 15.5–16.6 МПа" />
-        <TelemetryCard label="T на выходе активной зоны" value={telemetry.outletTemp} unit="°C" range="Предельное значение 335°C" />
-        <TelemetryCard label="Уровень в парогенераторе" value={telemetry.sgLevel} unit="м" range="Норма 2.2–2.6 м" />
-        <TelemetryCard label="Электрическая мощность" value={telemetry.electric} unit="МВт" range="Генератор подключен к сети" />
-        <TelemetryCard label="Частота генератора" value={telemetry.freq.toFixed(2)} unit="Гц" range="Номинальная частота 50 Гц" />
+        <TelemetryCard
+          label="Мощность реактора"
+          value={telemetry.power}
+          unit="%"
+          range="Рабочий диапазон 95–105%"
+          state={telemetry.scramActive ? 'danger' : telemetry.power < 95 ? 'warning' : 'normal'}
+        />
+        <TelemetryCard
+          label="Давление I контура"
+          value={telemetry.primaryPressure}
+          unit="МПа"
+          range="Норма 15.5–16.6 МПа"
+          state={telemetry.primaryPressure > 16.6 || telemetry.primaryPressure < 15.0 ? 'warning' : 'normal'}
+        />
+        <TelemetryCard
+          label="T на выходе активной зоны"
+          value={telemetry.outletTemp}
+          unit="°C"
+          range="Предельное значение 335°C"
+          state={telemetry.outletTemp > 330 ? 'warning' : 'normal'}
+        />
+        <TelemetryCard
+          label="Уровень в парогенераторе"
+          value={telemetry.sgLevel}
+          unit="м"
+          range="Норма 2.2–2.6 м"
+          state={telemetry.sgLevel < 2.2 || telemetry.sgLevel > 2.6 ? 'warning' : 'normal'}
+        />
+        <TelemetryCard
+          label="Электрическая мощность"
+          value={telemetry.electric}
+          unit="МВт"
+          range={telemetry.gridBreakerClosed ? 'Генератор подключен к сети' : 'ОТКЛЮЧЕН ОТ СЕТИ'}
+          state={!telemetry.gridBreakerClosed ? 'danger' : 'normal'}
+        />
+        <TelemetryCard
+          label="Частота генератора"
+          value={freqFormatted}
+          unit="Гц"
+          range="Номинальная частота 50 Гц"
+        />
       </div>
 
       <div className="grid-2 mt">
@@ -47,7 +88,18 @@ export default function DashboardPage({ session, operator, scenario, journal, te
           </div>
         </Panel>
 
-        <Panel title="Контроль состояния" meta={<StatusBadge type={telemetry.power < 95 ? 'warning' : 'normal'}>{telemetry.power < 95 ? 'ОТКЛОНЕНИЕ ПАРАМЕТРА' : 'ПАРАМЕТРЫ СТАБИЛЬНЫ'}</StatusBadge>}>
+        <Panel
+          title="Контроль состояния"
+          meta={
+            <StatusBadge type={telemetry.scramActive ? 'danger' : telemetry.power < 95 ? 'warning' : 'normal'}>
+              {telemetry.scramActive
+                ? 'АЗ-1: СБРОС СТЕРЖНЕЙ'
+                : telemetry.power < 95
+                ? 'ОТКЛОНЕНИЕ ПАРАМЕТРА'
+                : 'ПАРАМЕТРЫ СТАБИЛЬНЫ'}
+            </StatusBadge>
+          }
+        >
           <div className="reactor-summary">
             <div className="reactor-gauge">
               <b>{telemetry.power}%</b>
@@ -56,7 +108,7 @@ export default function DashboardPage({ session, operator, scenario, journal, te
             <div className="summary-values">
               <p><span>Давление I контура</span><b>{telemetry.primaryPressure} МПа</b></p>
               <p><span>Температура на выходе АЗ</span><b>{telemetry.outletTemp} °C</b></p>
-              <p><span>Частота сети</span><b>{telemetry.freq.toFixed(2)} Гц</b></p>
+              <p><span>Частота сети</span><b>{freqFormatted} Гц</b></p>
             </div>
           </div>
         </Panel>

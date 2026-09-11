@@ -11,7 +11,15 @@ const navigation = [
   ['scenarios', '◇', 'Сценарии'],
 ];
 
-export default function Sidebar({ page, setPage }) {
+export default function Sidebar({ page, setPage, connectionStatus = 'disconnected' }) {
+  const statusLabels = {
+    connected: ['Симулятор онлайн', 'Телеметрия 20 Гц (ВВЭР-1200)'],
+    connecting: ['Подключение...', 'ws://localhost:3000'],
+    disconnected: ['Симулятор: нет связи', 'Запустите сервер (порт 3000)'],
+  };
+
+  const [statusTitle, statusSub] = statusLabels[connectionStatus] || statusLabels.disconnected;
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -33,10 +41,10 @@ export default function Sidebar({ page, setPage }) {
       </nav>
       <div className="side-system">
         <div className="system-card">
-          <span className="status-dot" />
+          <span className={`status-dot ${connectionStatus}`} />
           <div>
-            <b>Симулятор подключен</b>
-            <small>Учебный контур · DEMO</small>
+            <b>{statusTitle}</b>
+            <small>{statusSub}</small>
           </div>
         </div>
         <div className="unit-label">ЛАЭС · ЭНЕРГОБЛОК ВВЭР-1200</div>
