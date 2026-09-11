@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ВВЭР-1200 — Пульт оператора БЩУ и Табло сигнализаций (TEST_DASHBOARD)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --panel-bg: #131b2e;
+      --card-bg: #1a243b;
+      --border: #2c3a58;
+      --border-bright: #3e517a;
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.4);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.4);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 15px 25px;
+      line-height: 1.35;
+    }
+
+    /* ШАПКА */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-online {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .status-offline {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    /* СВЕТОСИГНАЛЬНОЕ ТАБЛО БЩУ (ANNUNCIATOR BOARD) */
+    .annunciator-section {
+      background: #0c1220;
+      border: 2px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .annunciator-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .annunciator-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 6px;
+    }
+
+    .lamp {
+      background: #182238;
+      border: 1px solid #2d3d60;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 7px 4px;
+      text-align: center;
+      border-radius: 4px;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      line-height: 1.15;
+    }
+
+    /* Красные аварийные лампы */
+    .lamp.red-active {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #fee2e2;
+      box-shadow: 0 0 12px var(--danger-glow);
+      animation: pulse-red 1s infinite alternate;
+    }
+
+    /* Желтые предупреждающие лампы */
+    .lamp.yellow-active {
+      background: #78350f;
+      border-color: #f59e0b;
+      color: #fef3c7;
+      box-shadow: 0 0 10px var(--warning-glow);
+    }
+
+    /* Зеленые технологические статусы */
+    .lamp.green-active {
+      background: #064e3b;
+      border-color: #10b981;
+      color: #d1fae5;
+      box-shadow: 0 0 8px var(--success-glow);
+    }
+
+    @keyframes pulse-red {
+      0% {
+        opacity: 0.85;
+        filter: brightness(1.0);
+      }
+
+      100% {
+        opacity: 1.0;
+        filter: brightness(1.3);
+      }
+    }
+
+    /* ИЗМЕРИТЕЛЬНЫЕ ПРИБОРЫ (SCADA GAUGES) */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h3 {
+      font-size: 13px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 5px;
+    }
+
+    .param-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 7px;
+      font-size: 13px;
+    }
+
+    .param-label {
+      color: var(--text-dim);
+    }
+
+    .param-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      font-feature-settings: "tnum";
+    }
+
+    .param-value.highlight {
+      color: var(--accent);
+      font-size: 19px;
+    }
+
+    .param-unit {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-left: 4px;
+      font-weight: 400;
+    }
+
+    /* ОРГАНЫ УПРАВЛЕНИЯ */
+    .controls-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .controls-panel h2 {
+      font-size: 15px;
+      margin-bottom: 15px;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 15px;
+    }
+
+    .control-group {
+      background: #0c1220;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 7px;
+      border-radius: 4px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #24324f;
+      border: 1px solid #3e517a;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+
+    button:hover {
+      background: #32446a;
+      border-color: var(--accent);
+    }
+
+    button.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    button.pump-btn {
+      flex: 1;
+      text-align: center;
+    }
+
+    button.pump-on {
+      background: #065f46;
+      border-color: #10b981;
+      color: #ecfdf5;
+    }
+
+    button.pump-off {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #fee2e2;
+    }
+
+    button.danger-btn {
+      background: #dc2626;
+      border-color: #b91c1c;
+      color: white;
+      width: 100%;
+      font-size: 14px;
+      padding: 10px;
+    }
+
+    button.danger-btn:hover {
+      background: #ef4444;
+    }
+
+    button.reset-btn {
+      background: #2563eb;
+      border-color: #1d4ed8;
+      color: white;
+      width: 100%;
+      padding: 8px;
+    }
+
+    button.reset-btn:hover {
+      background: #3b82f6;
+    }
+
+    .footer-note {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div>
+      <h1>⚡ ЭНЕРГОБЛОК ВВЭР-1200 — ПУЛЬТ ОПЕРАТОРА БЩУ</h1>
+      <p style="color: var(--text-dim); font-size: 12px;">Полнофункциональная reduced-order модель с 29 сигнальными
+        лампами для Unity / SCADA</p>
+    </div>
+    <div id="statusBadge" class="status-badge status-offline">● ПОДКЛЮЧЕНИЕ...</div>
+  </header>
+
+  <!-- СВЕТОСИГНАЛЬНОЕ ТАБЛО БЩУ (29 ЛАМП) -->
+  <section class="annunciator-section">
+    <div class="annunciator-title">
+      <span>🚨 Светосигнальное табло систем безопасности и защит (Annunciator Panel)</span>
+      <span style="font-size: 11px; color: var(--text-dim);">Готово для биндинга к лампам Unity 3D</span>
+    </div>
+    <div class="annunciator-grid">
+      <!-- 10 Красных аварийных ламп -->
+      <div id="LAMP_AZ1" class="lamp">СБРОС АЗ-1</div>
+      <div id="LAMP_AZ2" class="lamp">СРАБАТЫВАНИЕ АЗ-2</div>
+      <div id="LAMP_PZ1" class="lamp">ЗАЩИТА ПЗ-1</div>
+      <div id="LAMP_CRIT_POWER" class="lamp">МОЩНОСТЬ &gt; 107%</div>
+      <div id="LAMP_CRIT_PERIOD" class="lamp">ПЕРИОД &lt; 10 С</div>
+      <div id="LAMP_P_PRIM_HIGH_TRIP" class="lamp">P1 &gt; 17.6 МПа</div>
+      <div id="LAMP_P_PRIM_LOW_TRIP" class="lamp">P1 &lt; 14.5 МПа</div>
+      <div id="LAMP_T_OUT_HIGH_TRIP" class="lamp">Tвых &gt; 335 °C</div>
+      <div id="LAMP_SG_LEVEL_LOW_TRIP" class="lamp">УРОВЕНЬ ПГ &lt; 1.8м</div>
+      <div id="LAMP_TURBINE_TRIPPED" class="lamp">СТОП-КЛАПАНЫ СК ТП</div>
+
+      <!-- 12 Желтых предупреждающих ламп -->
+      <div id="LAMP_POWER_WARN" class="lamp">МОЩНОСТЬ &gt; 104%</div>
+      <div id="LAMP_PERIOD_WARN" class="lamp">ПЕРИОД &lt; 20 С</div>
+      <div id="LAMP_P_PRIM_WARN" class="lamp">P1 &gt; 16.6 МПа</div>
+      <div id="LAMP_P_SEC_WARN" class="lamp">P2 &gt; 7.5 МПа</div>
+      <div id="LAMP_SG_LEVEL_HIGH" class="lamp">ВЫСОКИЙ УР. ПГ</div>
+      <div id="LAMP_RCP1_OFF" class="lamp">ГЦН-1 ОТКЛЮЧЕН</div>
+      <div id="LAMP_RCP2_OFF" class="lamp">ГЦН-2 ОТКЛЮЧЕН</div>
+      <div id="LAMP_RCP3_OFF" class="lamp">ГЦН-3 ОТКЛЮЧЕН</div>
+      <div id="LAMP_RCP4_OFF" class="lamp">ГЦН-4 ОТКЛЮЧЕН</div>
+      <div id="LAMP_BRU_K_OPEN" class="lamp">БРУ-К ОТКРЫТ</div>
+      <div id="LAMP_BRU_A_OPEN" class="lamp">БРУ-А ОТКРЫТ</div>
+      <div id="LAMP_PZR_HEATERS_FULL" class="lamp">ТЭН КД МАКСИМУМ</div>
+      <div id="LAMP_PZR_SPRAY_ON" class="lamp">ВПРЫСК КД ВКЛ</div>
+      <div id="LAMP_BORON_INJECTION" class="lamp">ВВОД БОРА</div>
+      <div id="LAMP_PURE_WATER" class="lamp">ДЕБОРИРОВАНИЕ</div>
+
+      <!-- 6 Зеленых / Белых статусных ламп -->
+      <div id="LAMP_STEADY_STATE" class="lamp">СТАЦИОНАР</div>
+      <div id="LAMP_GRID_SYNC" class="lamp">СЕТЬ 50.0 ГЦ</div>
+      <div id="LAMP_AUTO_PRESSURE" class="lamp">АР ДАВЛЕНИЯ 1К</div>
+      <div id="LAMP_AUTO_LEVEL_SG" class="lamp">АР УРОВНЯ ПГ</div>
+      <div id="LAMP_ROD_TOP" class="lamp">СУЗ ВЕРХ (100%)</div>
+      <div id="LAMP_ROD_BOTTOM" class="lamp">СУЗ НИЗ (0%)</div>
+    </div>
+  </section>
+
+  <!-- ИЗМЕРИТЕЛЬНЫЕ ПАНЕЛИ ПАРАМЕТРОВ -->
+  <div class="grid">
+    <!-- КАРТОЧКА 1: НЕЙТРОНИКА -->
+    <div class="card">
+      <h3>Нейтроника и Мощность</h3>
+      <div class="param-row"><span class="param-label">Тепловая мощность:</span>
+        <div><span id="powerMW" class="param-value highlight">3200.0</span><span class="param-unit">МВт</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Относительная:</span>
+        <div><span id="powerPct" class="param-value">100.0</span><span class="param-unit">%</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Электрическая:</span>
+        <div><span id="electricMW" class="param-value highlight" style="color:#34d399;">1185.7</span><span
+            class="param-unit">МВт</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Температура топлива:</span>
+        <div><span id="fuelTempC" class="param-value">600.0</span><span class="param-unit">°C</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Концентрация бора:</span>
+        <div><span id="boronPpm" class="param-value" style="color:#f59e0b;">650.0</span><span
+            class="param-unit">ppm</span></div>
+      </div>
+    </div>
+
+    <!-- КАРТОЧКА 2: ПЕРВЫЙ КОНТУР -->
+    <div class="card">
+      <h3>Первый контур (4 петли)</h3>
+      <div class="param-row"><span class="param-label">Давление 1 контура:</span>
+        <div><span id="pPrimMPa" class="param-value">16.19</span><span class="param-unit">МПа</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Вход в реактор (Tвх):</span>
+        <div><span id="coreInTempC" class="param-value">298.2</span><span class="param-unit">°C</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Выход из зоны (Tвых):</span>
+        <div><span id="coreOutTempC" class="param-value">328.6</span><span class="param-unit">°C</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Подогрев в зоне (&Delta;T):</span>
+        <div><span id="deltaTC" class="param-value">30.4</span><span class="param-unit">°C</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Расход теплоносителя:</span>
+        <div><span id="flowPrimKgS" class="param-value">17600</span><span class="param-unit">кг/с</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Уровень в КД:</span>
+        <div><span id="levelPzrM" class="param-value">5.70</span><span class="param-unit">м</span></div>
+      </div>
+    </div>
+
+    <!-- КАРТОЧКА 3: ВТОРОЙ КОНТУР И ТУРБИНА -->
+    <div class="card">
+      <h3>Второй контур и Парогенераторы</h3>
+      <div class="param-row"><span class="param-label">Давление пара (ПГ):</span>
+        <div><span id="pSecMPa" class="param-value">7.00</span><span class="param-unit">МПа</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Генерация пара:</span>
+        <div><span id="steamFlowKgS" class="param-value">1774.8</span><span class="param-unit">кг/с</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Расход на турбину:</span>
+        <div><span id="turbFlowKgS" class="param-value">1773.6</span><span class="param-unit">кг/с</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Сброс БРУ-К / БРУ-А:</span>
+        <div><span id="dumpFlowKgS" class="param-value">0.0 / 0.0</span><span class="param-unit">кг/с</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Уровень в ПГ:</span>
+        <div><span id="levelSgM" class="param-value">2.40</span><span class="param-unit">м</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Обороты ротора ТГ:</span>
+        <div><span id="turbRpm" class="param-value">3000</span><span class="param-unit">об/мин</span> (<span
+            id="freqHz">50.0</span> Гц)</div>
+      </div>
+    </div>
+
+    <!-- КАРТОЧКА 4: РЕАКТИВНОСТЬ -->
+    <div class="card">
+      <h3>Реактивность и Время</h3>
+      <div class="param-row"><span class="param-label">Полная реактивность:</span>
+        <div><span id="reactivityTotalPcm" class="param-value">0.0</span><span class="param-unit">pcm</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Доплер (топливо):</span>
+        <div><span id="reactivityDopplerPcm" class="param-value">0.0</span><span class="param-unit">pcm</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Замедлитель (вода):</span>
+        <div><span id="reactivityCoolantPcm" class="param-value">0.0</span><span class="param-unit">pcm</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Борная кислота:</span>
+        <div><span id="reactivityBoronPcm" class="param-value">0.0</span><span class="param-unit">pcm</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Стержни СУЗ (Гр. 10):</span>
+        <div><span id="reactivityRodsPcm" class="param-value">0.0</span><span class="param-unit">pcm</span></div>
+      </div>
+      <div class="param-row"><span class="param-label">Модельное время:</span>
+        <div><span id="simTime" class="param-value" style="color:#e2e8f0;">0.0</span><span class="param-unit">сек</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ОРГАНЫ УПРАВЛЕНИЯ ОПЕРАТОРА (CONTROL CONSOLE) -->
+  <section class="controls-panel">
+    <h2>
+      <span>🕹️ ОРГАНЫ УПРАВЛЕНИЯ ЭНЕРГОБЛОКОМ</span>
+      <span style="font-size: 12px; color: var(--text-dim); font-weight: normal;">Все изменения мгновенно влияют на
+        дифференциальные уравнения реактора</span>
+    </h2>
+
+    <div class="controls-grid">
+
+      <!-- 1. СУЗ И БОРНОЕ РЕГУЛИРОВАНИЕ -->
+      <div class="control-group">
+        <label>
+          <span>СУЗ (Группа 10 ОР СУЗ)</span>
+          <span style="color:var(--accent);" id="rodLabel">70.0% (факт: 70.0%)</span>
+        </label>
+        <input type="range" id="rodSlider" min="0" max="100" step="0.5" value="70">
+        <div class="btn-row">
+          <button onclick="adjustRods(-1.0)">▼ -1%</button>
+          <button onclick="adjustRods(-5.0)">▼▼ -5%</button>
+          <button onclick="adjustRods(+1.0)">▲ +1%</button>
+          <button onclick="adjustRods(+5.0)">▲▲ +5%</button>
+        </div>
+        <div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 8px;">
+          <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 6px;">Борное регулирование (ХВО):</div>
+          <div class="btn-row">
+            <button id="btnBoron" onclick="toggleBoronPump()">🧪 Ввод бора (+H3BO3)</button>
+            <button id="btnPureWater" onclick="togglePureWaterPump()">💧 Деборирование</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. УПРАВЛЕНИЕ 4 ГЦН (ГЛАВНЫЕ НАСОСЫ) -->
+      <div class="control-group">
+        <label>
+          <span>Главные циркуляционные насосы</span>
+          <span style="color:#34d399;" id="rcpActiveCount">4 из 4 в работе</span>
+        </label>
+        <div class="btn-row" style="margin-bottom: 10px;">
+          <button id="rcpBtn0" class="pump-btn pump-on" onclick="toggleRCP(0)">ГЦН-1</button>
+          <button id="rcpBtn1" class="pump-btn pump-on" onclick="toggleRCP(1)">ГЦН-2</button>
+          <button id="rcpBtn2" class="pump-btn pump-on" onclick="toggleRCP(2)">ГЦН-3</button>
+          <button id="rcpBtn3" class="pump-btn pump-on" onclick="toggleRCP(3)">ГЦН-4</button>
+        </div>
+        <label style="margin-top: 8px;">
+          <span>Обороты ГЦН</span>
+          <span id="rcpSpeedLabel">100%</span>
+        </label>
+        <input type="range" id="rcpSpeedSlider" min="40" max="100" step="5" value="100"
+          oninput="setRcpSpeed(this.value)">
+      </div>
+
+      <!-- 3. КОМПЕНСАТОР ДАВЛЕНИЯ (КД) -->
+      <div class="control-group">
+        <label>
+          <span>Давление 1 контура (КД)</span>
+          <span id="pzrModeLabel" style="color:var(--accent);">АВТОМАТ</span>
+        </label>
+        <div class="btn-row" style="margin-bottom: 8px;">
+          <button id="btnPzrAuto" class="active" onclick="setPzrMode('AUTO')">АВТОМАТ</button>
+          <button id="btnPzrManual" onclick="setPzrMode('MANUAL')">РУЧНОЙ</button>
+        </div>
+        <div id="pzrManualBlock" style="opacity: 0.5;">
+          <label style="font-size: 11px;">Впрыск КД: <span id="pzrSprayVal">0%</span></label>
+          <input type="range" id="pzrSpraySlider" min="0" max="100" value="0" disabled
+            oninput="setPzrSpray(this.value)">
+          <label style="font-size: 11px;">ТЭН КД (мощность): <span id="pzrHeatVal">0.18 МВт</span></label>
+          <input type="range" id="pzrHeatSlider" min="0" max="252" value="18" disabled oninput="setPzrHeat(this.value)">
+        </div>
+      </div>
+
+      <!-- 4. ПАРОТУРБИННАЯ УСТАНОВКА (ТУРБИНА И СЕТЬ) -->
+      <div class="control-group">
+        <label>
+          <span>Клапаны турбины (РК ТП)</span>
+          <span style="color:#34d399;" id="valveLabel">100.0%</span>
+        </label>
+        <input type="range" id="valveSlider" min="0" max="110" step="1" value="100">
+        <div class="btn-row">
+          <button onclick="adjustValve(-2.0)">▼ -2%</button>
+          <button onclick="adjustValve(+2.0)">▲ +2%</button>
+          <button id="btnStopValves" style="background:#065f46;" onclick="toggleStopValves()">СК ТП: ОТКРЫТЫ</button>
+          <button id="btnGrid" style="background:#065f46;" onclick="toggleGrid()">СЕТЬ: ВКЛ</button>
+        </div>
+        <div style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 6px;">
+          <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 4px;">Сброс пара:</div>
+          <div class="btn-row">
+            <button id="btnBruK" onclick="toggleBruK()">БРУ-К (конденсатор)</button>
+            <button id="btnBruA" onclick="toggleBruA()">БРУ-А (атмосфера)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. АВАРИЙНЫЕ КОМАНДЫ -->
+      <div class="control-group" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <button class="danger-btn" onclick="tripAZ()">🚨 АВАРИЙНАЯ ЗАЩИТА (СБРОС АЗ-1)</button>
+        </div>
+        <div style="margin-top: 12px;">
+          <button class="reset-btn" onclick="resetSim()">🔄 СБРОС В 100% НОМИНАЛ</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    let ws = null;
+    let currentRodTarget = 0.70;
+    let currentValveTarget = 1.00;
+    let rcpActiveState = [true, true, true, true];
+    let stopValvesOpen = true;
+    let gridConnected = true;
+    let pzrMode = 'AUTO';
+    let boronPumpOn = false;
+    let pureWaterPumpOn = false;
+    let bruKManualOpen = false;
+    let bruAManualOpen = false;
+
+    function connect() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const url = `${proto}//${location.host}`;
+      ws = new WebSocket(url);
+
+      ws.onopen = () => {
+        const b = document.getElementById('statusBadge');
+        b.className = 'status-badge status-online';
+        b.innerText = '● ОНЛАЙН (20 ГЦ)';
+      };
+
+      ws.onclose = () => {
+        const b = document.getElementById('statusBadge');
+        b.className = 'status-badge status-offline';
+        b.innerText = '● НЕТ СВЯЗИ (ПОВТОР...)';
+        setTimeout(connect, 1000);
+      };
+
+      ws.onmessage = (evt) => {
+        try {
+          const d = JSON.parse(evt.data);
+          if (d.type === 'TELEMETRY') {
+            // Приборы
+            document.getElementById('simTime').innerText = d.time.toFixed(1);
+            document.getElementById('powerMW').innerText = d.powerMW.toFixed(1);
+            document.getElementById('powerPct').innerText = d.powerPct.toFixed(1);
+            document.getElementById('electricMW').innerText = d.electricMW.toFixed(1);
+            document.getElementById('fuelTempC').innerText = d.fuelTempC.toFixed(1);
+            document.getElementById('boronPpm').innerText = d.boronPpm.toFixed(1);
+
+            document.getElementById('pPrimMPa').innerText = d.pPrimMPa.toFixed(2);
+            document.getElementById('coreInTempC').innerText = d.coreInTempC.toFixed(1);
+            document.getElementById('coreOutTempC').innerText = d.coreOutTempC.toFixed(1);
+            document.getElementById('deltaTC').innerText = d.deltaTC.toFixed(1);
+            document.getElementById('flowPrimKgS').innerText = Math.round(d.flowPrimKgS);
+            document.getElementById('levelPzrM').innerText = d.levelPzrM.toFixed(2);
+
+            document.getElementById('pSecMPa').innerText = d.pSecMPa.toFixed(2);
+            document.getElementById('steamFlowKgS').innerText = d.steamFlowKgS.toFixed(1);
+            document.getElementById('turbFlowKgS').innerText = d.turbFlowKgS.toFixed(1);
+            document.getElementById('dumpFlowKgS').innerText = `${d.bruKFlowKgS.toFixed(0)} / ${d.bruAFlowKgS.toFixed(0)}`;
+            document.getElementById('levelSgM').innerText = d.levelSgM.toFixed(2);
+            document.getElementById('turbRpm').innerText = Math.round(d.turbRpm);
+            document.getElementById('freqHz').innerText = d.freqHz.toFixed(1);
+
+            document.getElementById('reactivityTotalPcm').innerText = d.reactivityTotalPcm.toFixed(1);
+            document.getElementById('reactivityDopplerPcm').innerText = d.reactivityDopplerPcm.toFixed(1);
+            document.getElementById('reactivityCoolantPcm').innerText = d.reactivityCoolantPcm.toFixed(1);
+            document.getElementById('reactivityBoronPcm').innerText = d.reactivityBoronPcm.toFixed(1);
+            document.getElementById('reactivityRodsPcm').innerText = d.reactivityRodsPcm.toFixed(1);
+
+            document.getElementById('rodLabel').innerText = `${(d.rodPosTarget * 100).toFixed(1)}% (факт: ${(d.rodPosActual * 100).toFixed(1)}%)`;
+            document.getElementById('valveLabel').innerText = `${(d.valveTarget * 100).toFixed(1)}% (факт: ${(d.valveActual * 100).toFixed(1)}%)`;
+            document.getElementById('rcpActiveCount').innerText = `${d.rcpCountActive} из 4 в работе`;
+
+            // Обновление состояния 29 ламп светосигнального табло
+            if (d.lamps) {
+              for (const [lampId, active] of Object.entries(d.lamps)) {
+                const el = document.getElementById(lampId);
+                if (el) {
+                  // Определяем цветовую категорию
+                  if (lampId.startsWith('LAMP_AZ') || lampId.startsWith('LAMP_CRIT') || lampId.endsWith('_TRIP') || lampId.includes('TRIPPED') || lampId.includes('DISCONNECT')) {
+                    el.className = active ? 'lamp red-active' : 'lamp';
+                  } else if (lampId.endsWith('_WARN') || lampId.includes('OFF') || lampId.includes('OPEN') || lampId.includes('PZR_') || lampId.includes('BORON') || lampId.includes('WATER') || lampId.includes('HIGH')) {
+                    el.className = active ? 'lamp yellow-active' : 'lamp';
+                  } else {
+                    el.className = active ? 'lamp green-active' : 'lamp';
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      };
+    }
+
+    // СУЗ
+    document.getElementById('rodSlider').oninput = (e) => {
+      currentRodTarget = parseFloat(e.target.value) / 100.0;
+      sendCmd('SET_ROD_TARGET', currentRodTarget);
+    };
+
+    function adjustRods(deltaPct) {
+      currentRodTarget = Math.max(0.0, Math.min(1.0, currentRodTarget + deltaPct / 100.0));
+      document.getElementById('rodSlider').value = currentRodTarget * 100.0;
+      sendCmd('SET_ROD_TARGET', currentRodTarget);
+    }
+
+    // Бор
+    function toggleBoronPump() {
+      boronPumpOn = !boronPumpOn;
+      if (boronPumpOn) pureWaterPumpOn = false;
+      document.getElementById('btnBoron').className = boronPumpOn ? 'active' : '';
+      document.getElementById('btnPureWater').className = '';
+      sendCmd('SET_BORON_PUMP', boronPumpOn);
+      sendCmd('SET_PURE_WATER_PUMP', false);
+    }
+
+    function togglePureWaterPump() {
+      pureWaterPumpOn = !pureWaterPumpOn;
+      if (pureWaterPumpOn) boronPumpOn = false;
+      document.getElementById('btnPureWater').className = pureWaterPumpOn ? 'active' : '';
+      document.getElementById('btnBoron').className = '';
+      sendCmd('SET_PURE_WATER_PUMP', pureWaterPumpOn);
+      sendCmd('SET_BORON_PUMP', false);
+    }
+
+    // ГЦН
+    function toggleRCP(idx) {
+      rcpActiveState[idx] = !rcpActiveState[idx];
+      const btn = document.getElementById(`rcpBtn${idx}`);
+      btn.className = rcpActiveState[idx] ? 'pump-btn pump-on' : 'pump-btn pump-off';
+      sendCmd('TOGGLE_RCP', { index: idx, value: rcpActiveState[idx] });
+    }
+
+    function setRcpSpeed(val) {
+      document.getElementById('rcpSpeedLabel').innerText = `${val}%`;
+      sendCmd('SET_RCP_SPEED', parseFloat(val) / 100.0);
+    }
+
+    // КД
+    function setPzrMode(mode) {
+      pzrMode = mode;
+      document.getElementById('btnPzrAuto').className = mode === 'AUTO' ? 'active' : '';
+      document.getElementById('btnPzrManual').className = mode === 'MANUAL' ? 'active' : '';
+      document.getElementById('pzrModeLabel').innerText = mode === 'AUTO' ? 'АВТОМАТ' : 'РУЧНОЙ';
+      const isManual = mode === 'MANUAL';
+      document.getElementById('pzrManualBlock').style.opacity = isManual ? '1.0' : '0.5';
+      document.getElementById('pzrSpraySlider').disabled = !isManual;
+      document.getElementById('pzrHeatSlider').disabled = !isManual;
+      sendCmd('SET_PZR_MODE', mode);
+    }
+
+    function setPzrSpray(val) {
+      document.getElementById('pzrSprayVal').innerText = `${val}%`;
+      sendCmd('SET_PZR_SPRAY', parseFloat(val) / 100.0);
+    }
+
+    function setPzrHeat(val) {
+      const mw = (parseFloat(val) / 100.0).toFixed(2);
+      document.getElementById('pzrHeatVal').innerText = `${mw} МВт`;
+      sendCmd('SET_PZR_HEATERS', parseFloat(mw));
+    }
+
+    // Турбина
+    document.getElementById('valveSlider').oninput = (e) => {
+      currentValveTarget = parseFloat(e.target.value) / 100.0;
+      sendCmd('SET_TURBINE_VALVE', currentValveTarget);
+    };
+
+    function adjustValve(deltaPct) {
+      currentValveTarget = Math.max(0.0, Math.min(1.1, currentValveTarget + deltaPct / 100.0));
+      document.getElementById('valveSlider').value = currentValveTarget * 100.0;
+      sendCmd('SET_TURBINE_VALVE', currentValveTarget);
+    }
+
+    function toggleStopValves() {
+      stopValvesOpen = !stopValvesOpen;
+      const btn = document.getElementById('btnStopValves');
+      btn.innerText = stopValvesOpen ? 'СК ТП: ОТКРЫТЫ' : 'СК ТП: ПОСАЖЕНЫ';
+      btn.style.background = stopValvesOpen ? '#065f46' : '#7f1d1d';
+      sendCmd('TRIP_TURBINE', stopValvesOpen);
+    }
+
+    function toggleGrid() {
+      gridConnected = !gridConnected;
+      const btn = document.getElementById('btnGrid');
+      btn.innerText = gridConnected ? 'СЕТЬ: ВКЛ' : 'СЕТЬ: ОТКЛ';
+      btn.style.background = gridConnected ? '#065f46' : '#7f1d1d';
+      sendCmd('TOGGLE_GRID', gridConnected);
+    }
+
+    function toggleBruK() {
+      bruKManualOpen = !bruKManualOpen;
+      document.getElementById('btnBruK').className = bruKManualOpen ? 'active' : '';
+      sendCmd('SET_BRU_K', bruKManualOpen ? 1.0 : -1);
+    }
+
+    function toggleBruA() {
+      bruAManualOpen = !bruAManualOpen;
+      document.getElementById('btnBruA').className = bruAManualOpen ? 'active' : '';
+      sendCmd('SET_BRU_A', bruAManualOpen ? 1.0 : -1);
+    }
+
+    function tripAZ() {
+      if (confirm('ВНИМАНИЕ: Сбросить аварийную защиту АЗ-1? Все стержни упадут в активную зону!')) {
+        sendCmd('TRIP_AZ', true);
+      }
+    }
+
+    function resetSim() {
+      currentRodTarget = 0.70;
+      currentValveTarget = 1.00;
+      rcpActiveState = [true, true, true, true];
+      stopValvesOpen = true;
+      gridConnected = true;
+      boronPumpOn = false;
+      pureWaterPumpOn = false;
+      bruKManualOpen = false;
+      bruAManualOpen = false;
+
+      document.getElementById('rodSlider').value = 70;
+      document.getElementById('valveSlider').value = 100;
+      document.getElementById('rcpSpeedSlider').value = 100;
+      document.getElementById('rcpSpeedLabel').innerText = '100%';
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`rcpBtn${i}`).className = 'pump-btn pump-on';
+      }
+      document.getElementById('btnStopValves').innerText = 'СК ТП: ОТКРЫТЫ';
+      document.getElementById('btnStopValves').style.background = '#065f46';
+      document.getElementById('btnGrid').innerText = 'СЕТЬ: ВКЛ';
+      document.getElementById('btnGrid').style.background = '#065f46';
+      document.getElementById('btnBoron').className = '';
+      document.getElementById('btnPureWater').className = '';
+      document.getElementById('btnBruK').className = '';
+      document.getElementById('btnBruA').className = '';
+      setPzrMode('AUTO');
+
+      sendCmd('RESET', true);
+    }
+
+    function sendCmd(action, value) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        if (typeof value === 'object') {
+          ws.send(JSON.stringify({ action, ...value }));
+        } else {
+          ws.send(JSON.stringify({ action, value }));
+        }
+      }
+    }
+
+    connect();
+  </script>
+</body>
+
+</html>
