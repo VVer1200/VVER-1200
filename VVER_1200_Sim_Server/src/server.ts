@@ -12,6 +12,9 @@ import { ReactorEngine } from './simulation/reactor-engine.js';
 import { ControlInputs } from './core/types.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const MODE = process.env.NODE_ENV || 'development';
+const VERSION = '1.0.0';
+const BUILD_ID = 'kt01-v1';
 const engine = new ReactorEngine();
 
 // Исходное стационарное состояние органов управления (100% Nnom)
@@ -189,6 +192,9 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       status: 'online',
+      version: VERSION,
+      buildId: BUILD_ID,
+      mode: MODE,
       simTime: engine.getState().simulationTime,
       inputs: currentInputs,
       isSteadyState: engine.getState().diagnostics.isSteadyState
@@ -329,6 +335,7 @@ setInterval(() => {
 server.listen(PORT, () => {
   console.log('========================================================================');
   console.log(`  [VVER-1200 SIM SERVER] СЕРВЕР СИМУЛЯЦИИ УСПЕШНО ЗАПУЩЕН!`);
+  console.log(`  Версия: ${VERSION} (Сборка: ${BUILD_ID}) | Режим: ${MODE}`);
   console.log(`  Порт: ${PORT}`);
   console.log(`  HTTP API: http://localhost:${PORT}/api/status`);
   console.log(`  WebSocket телеметрия (20 Гц): ws://localhost:${PORT}`);
