@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: VVER_1200_Sim_Server
-        run: npm ci
+        run: npm install
 
       - name: Run 16 Automated Physics Validation Tests
         working-directory: VVER_1200_Sim_Server
@@ -46,12 +46,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-          cache-dependency-path: power-unit-operator-simulator/package-lock.json
 
       - name: Install dependencies
         working-directory: power-unit-operator-simulator
-        run: npm ci
+        run: npm install
 
       - name: Build Production Bundle
         working-directory: power-unit-operator-simulator
