@@ -6,9 +6,11 @@ import PlantMimic from '../components/PlantMimic';
 import StatusBadge from '../components/StatusBadge';
 import { formatTime } from '../utils/formatters';
 import simulatorService, { ALARM_NAMES } from '../services/simulatorService';
+import AZConfirmModal from '../components/AZConfirmModal';
 
 export default function LiveMonitorPage({ session, operator, scenario, telemetry, addLog, onFinish }) {
   const [modal, setModal] = useState(false);
+  const [azModal, setAzModal] = useState(false);
 
   const events = [
     { label: 'Отключение ГЦН-2', desc: 'Снижение циркуляции в петле №2' },
@@ -24,10 +26,13 @@ export default function LiveMonitorPage({ session, operator, scenario, telemetry
   };
 
   const handleTripAz = () => {
-    if (window.confirm('ВНИМАНИЕ: Сбросить аварийную защиту АЗ-1? Все стержни СУЗ упадут в активную зону!')) {
-      simulatorService.tripAz();
-      addLog('instructor', 'Инструктор активировал сброс аварийной защиты АЗ-1.');
-    }
+    setAzModal(true);
+  };
+
+  const handleConfirmAz = () => {
+    setAzModal(false);
+    simulatorService.tripAz();
+    addLog('instructor', 'Оператор подтвердил экстренный сброс аварийной защиты АЗ-1.');
   };
 
   const handleResetSim = () => {
@@ -180,6 +185,12 @@ export default function LiveMonitorPage({ session, operator, scenario, telemetry
           </div>
         </div>
       )}
+
+      <AZConfirmModal
+        isOpen={azModal}
+        onConfirm={handleConfirmAz}
+        onCancel={() => setAzModal(false)}
+      />
     </>
   );
 }
