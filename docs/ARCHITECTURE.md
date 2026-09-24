@@ -39,7 +39,7 @@ flowchart TB
         UnityClient["3D-симулятор БЩУ / Машзала<br/>(Unity C# Client)"]
     end
 
-    WSS -->|Широковещательный поток телеметрии (JSON, 20 Гц)| WebClient
+    WSS -->|"Широковещательный поток телеметрии (JSON, 20 Гц)"| WebClient
     WebClient -->|Команды инструктора и сценариев| WSS
     WSS -.->|Широковещательный поток телеметрии| UnityClient
     UnityClient -.->|Команды оператора БЩУ| WSS
