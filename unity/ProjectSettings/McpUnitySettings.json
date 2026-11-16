@@ -1,0 +1,11 @@
+{
+    "Host": "127.0.0.1",
+    "Port": 8090,
+    "RequestTimeoutSeconds": 10,
+    "AutoStartServer": true,
+    "AllowBatchModeServer": false,
+    "EnableInfoLogs": false,
+    "NpmExecutablePath": "",
+    "AllowRemoteConnections": true,
+    "AllowPackageInstallation": false
+}
