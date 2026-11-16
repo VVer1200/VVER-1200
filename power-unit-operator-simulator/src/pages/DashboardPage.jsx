@@ -1,7 +1,6 @@
 // Назначение файла: Главный обзор энергоблока: показатели, мнемосхема и события.
 import React, { useState } from 'react';
 import './DashboardPage.css';
-import Panel from '../components/Panel';
 import StatusBadge from '../components/StatusBadge';
 import EventRow from '../components/EventRow';
 import PlantMimic from '../components/PlantMimic';
