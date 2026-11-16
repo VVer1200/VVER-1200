@@ -4,7 +4,6 @@ import './DashboardPage.css';
 import StatusBadge from '../components/StatusBadge';
 import EventRow from '../components/EventRow';
 import PlantMimic from '../components/PlantMimic';
-import TelemetryCard from '../components/TelemetryCard';
 import { formatTime } from '../utils/formatters';
 export default function DashboardPage({ session, operator, scenario, journal, telemetry, setPage, connectionStatus = 'disconnected' }) {
     const [immersive, setImmersive] = useState(true);
