@@ -1,0 +1,29 @@
+/* V4: targeted component fixes and new interactive scenario design */
+.instrument-interactive .telemetry-label i {display:none!important}
+.telemetry-card.instrument-interactive .telemetry-label{padding-right:36px}
+.telemetry-card.instrument-interactive .telemetry-label .telemetry-state-dot{position:absolute;right:23px;top:24px;width:9px;height:9px;border-radius:50%;background:#3ce4ad;box-shadow:0 0 12px #3ce4ad;flex-shrink:0}
+.telemetry-card.instrument-interactive .telemetry-state-dot.warning{background:#ffb45d;box-shadow:0 0 12px #ffb45d}
+.telemetry-card.instrument-interactive .telemetry-state-dot.danger{background:#ff647f;box-shadow:0 0 12px #ff647f}
+.telemetry-card.instrument-interactive .instrument-expand{top:auto;bottom:17px;right:17px;display:grid;place-items:center;width:25px;height:25px;border:1px solid var(--ux-border);border-radius:7px;background:var(--ux-surface2);box-shadow:none}
+.ux-table-actions{display:flex;flex-wrap:wrap;gap:12px}
+.ux-table-actions select{appearance:none;-webkit-appearance:none;min-width:160px;padding:13px 45px 13px 16px;cursor:pointer;background-color:var(--ux-surface2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e9fc9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-position:right 15px center;background-repeat:no-repeat}
+.scenario-visual-header{position:relative;isolation:isolate;height:190px;overflow:hidden;border-radius:18px;margin:0 0 24px;border:1px solid var(--ux-border);background:#0b0925}
+.scenario-visual-header img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.65;animation:visual-drift 16s ease-in-out infinite alternate}
+.scenario-visual-header:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#07091b 4%,rgba(7,9,27,.8) 43%,transparent)}
+.scenario-visual-header>div{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;height:100%;padding:30px;gap:9px;color:#fff}
+.scenario-visual-header span{font-size:11px;letter-spacing:.16em;color:#62e7ff}.scenario-visual-header strong{font-size:27px}.scenario-visual-header p{font-size:13px;color:#c7c5ee;margin:0}
+.scenario-cards-v4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.scenario-card-v4{min-width:0;border:1px solid var(--ux-border);background:var(--ux-surface);border-radius:18px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s}
+.scenario-card-v4:hover{border-color:var(--ux-purple);transform:translateY(-3px);box-shadow:0 14px 35px rgba(73,52,160,.12)}.scenario-card-v4.open{border-color:var(--ux-cyan)}
+.scenario-card-v4-art{height:155px;position:relative;background:#080b19;overflow:hidden}.scenario-card-v4-art img{width:100%;height:100%;object-fit:cover;opacity:.85;transition:transform .6s}.scenario-card-v4:hover .scenario-card-v4-art img{transform:scale(1.06)}
+.scenario-card-v4-art:after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,8,25,.65),transparent 70%);pointer-events:none}
+.scenario-card-v4-art span{position:absolute;z-index:1;bottom:15px;left:20px;font-size:11px;letter-spacing:.13em;color:white}
+.scenario-card-v4-art>svg{position:absolute;z-index:1;right:20px;bottom:13px;color:#62e7ff}
+.scenario-card-v4-body{padding:22px}.scenario-card-v4-body>small{color:var(--ux-cyan);font-size:12px}.scenario-card-v4-body h3{font-size:20px;line-height:1.35;margin:11px 0}.scenario-card-v4-body>p{color:var(--ux-muted);line-height:1.6;min-height:48px;font-size:13px}
+.scenario-details-button{margin-top:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--ux-border);background:var(--ux-surface2);color:var(--ux-text);border-radius:10px;padding:13px;cursor:pointer;font-weight:600}
+.scenario-details-button:hover{border-color:var(--ux-cyan)}.scenario-inline-details{border-top:1px solid var(--ux-border);margin-top:20px;padding-top:18px;animation:detail-enter .25s ease}
+.scenario-inline-details h4{margin:0 0 12px}.scenario-inline-details dl{margin:0}.scenario-inline-details dl>div{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid var(--ux-border);font-size:13px}.scenario-inline-details dt{color:var(--ux-muted)}.scenario-inline-details dd{margin:0;text-align:right}.scenario-inline-details p{font-size:12px;color:var(--ux-muted);line-height:1.6}.scenario-inline-details .ux-primary{width:100%;justify-content:center}
+.mock-dialog label{display:block;margin:12px 0 8px;font-size:13px;color:var(--ux-text)}.mock-dialog select{width:100%;padding:12px;background:var(--ux-surface2);border:1px solid var(--ux-border);border-radius:9px;color:var(--ux-text);margin-bottom:15px}.mock-dialog .ux-primary{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin:8px 0}.mock-feedback{position:fixed;bottom:22px;right:22px;z-index:100;display:flex;align-items:center;gap:18px;padding:15px 18px;border:1px solid #3ce4ad;background:#101d2c;color:#f1f8ff;border-radius:12px;box-shadow:0 15px 40px #0007}.mock-feedback button{border:0;background:none;color:inherit;cursor:pointer}
+@keyframes visual-drift{from{transform:scale(1)}to{transform:scale(1.1) translateX(-1%)}}@keyframes detail-enter{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:850px){.scenario-cards-v4{grid-template-columns:1fr}.scenario-visual-header{height:155px}.ux-table-actions select{min-width:145px}}
+@media(prefers-reduced-motion:reduce){.scenario-visual-header img{animation:none}.scenario-card-v4,.scenario-card-v4-art img{transition:none}}

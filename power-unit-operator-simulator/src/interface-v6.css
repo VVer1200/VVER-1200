@@ -1,0 +1,51 @@
+/* V6: compact non-expandable telemetry cards */
+.telemetry-card.instrument-interactive { cursor: default !important; }
+.telemetry-card.instrument-interactive:hover { transform: none !important; }
+.telemetry-card.instrument-interactive .telemetry-label { padding-right: 30px; }
+
+/* Native select arrow: reserve room and use a consistent inset chevron */
+.mock-dialog select#mock-action-select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 15px 52px 15px 18px !important;
+  color: var(--ux-text) !important;
+  background-color: var(--ux-surface2) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23b7c8ee' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 18px 18px;
+  color-scheme: dark;
+}
+.mock-dialog select#mock-action-select option { background: #151a35; color: #f3f6ff; }
+:root[data-theme="light"] .mock-dialog select#mock-action-select {
+  color-scheme: light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23334b65' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"] .mock-dialog select#mock-action-select option { background: #fff; color: #1b293b; }
+
+/* Modal action must not inherit the generic dark modal button style */
+.event-modal.mock-dialog > button.ux-primary {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 11px !important;
+  width: 100%;
+  background: linear-gradient(110deg, #31d6f2, #a57bff) !important;
+  color: #080d22 !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  font-weight: 800 !important;
+  padding: 16px 20px !important;
+  cursor: pointer;
+}
+.event-modal.mock-dialog > button.ux-primary svg {
+  flex: 0 0 auto;
+  margin: 0 !important;
+  color: currentColor !important;
+}
+.event-modal.mock-dialog > button.ux-primary:hover { filter: brightness(1.06); }
+.event-modal.mock-dialog > button.ux-primary:focus-visible,
+.mock-dialog select#mock-action-select:focus-visible { outline: 2px solid var(--ux-cyan); outline-offset: 3px; }

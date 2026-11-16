@@ -1,0 +1,132 @@
+/* CONTROL ROOM / 02 — визуальная система для инженерного рабочего места.
+   Загружается ПОСЛЕ legacy-стилей. Данные и сетевые команды не изменяются. */
+:root, :root[data-theme="dark"] {
+  --canvas:#10171d; --surface:#1a232a; --surface-raised:#222e36;
+  --surface-inset:#141d23; --ink:#f0f2f0; --muted:#b0bdc5;
+  --stroke:#39464e; --stroke-strong:#5a6972; --accent:#e2b765;
+  --accent-ink:#211a0d; --accent-soft:#3a3326;
+  --success-ink:#9fe0ba; --warning-ink:#f5c97d; --danger-ink:#ffaaa5;
+  --shadow:none; color-scheme:dark;
+}
+:root[data-theme="light"] {
+  --canvas:#e9eceb; --surface:#fffefa; --surface-raised:#f2f3f0;
+  --surface-inset:#e5eae8; --ink:#17262c; --muted:#52646d;
+  --stroke:#c6d0d0; --stroke-strong:#8c9ca1; --accent:#9a5d12;
+  --accent-ink:#ffffff; --accent-soft:#f6e8d1;
+  --success-ink:#155b38; --warning-ink:#785009; --danger-ink:#9d252a;
+  --shadow:none; color-scheme:light;
+}
+html,body,#root {background:var(--canvas);color:var(--ink)}
+body {min-width:760px;font-family:"Segoe UI",Arial,sans-serif;letter-spacing:.002em}
+button,input,select,textarea {font-family:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {outline:3px solid var(--accent);outline-offset:3px}
+.app-shell {background:var(--canvas)}
+/* Навигация — технический реестр, а не набор одинаковых карточек */
+.sidebar {width:264px;background:var(--surface-inset);border-right:1px solid var(--stroke);box-shadow:none}
+.sidebar-brand {padding:24px 20px;border-bottom:1px solid var(--stroke)}
+.role-tag {margin:24px 19px 13px;padding:0;color:var(--muted);letter-spacing:.11em;font-size:10px}
+.role-tag span,.role-tag strong {display:block}.role-tag strong{font-size:13px;color:var(--ink);margin-top:7px;letter-spacing:.07em;font-weight:700}
+.sidebar nav {padding:0 10px}
+.sidebar nav button {min-height:58px;margin:0;border-radius:0;border-bottom:1px solid var(--stroke);gap:13px;padding:10px 11px;background:transparent;color:var(--muted);transition:background .18s,color .18s}
+.sidebar nav button>span {font-family:Consolas,monospace;width:27px;flex:0 0 27px;text-align:left;font-size:12px;letter-spacing:.03em;color:var(--muted)}
+.sidebar nav button>b {font-size:14px;white-space:normal;font-weight:600;line-height:1.3}
+.sidebar nav button.active {background:var(--accent-soft);box-shadow:inset 3px 0 var(--accent);color:var(--ink)}
+.sidebar nav button.active>span {color:var(--accent);font-weight:700}
+.sidebar nav button:hover {background:var(--surface-raised);color:var(--ink)}
+.sidebar nav button.active:hover {background:var(--accent-soft)}
+.sidebar nav button>i {box-shadow:none;width:6px;height:6px}
+.side-system {padding:18px 15px 24px}
+.system-card {background:var(--surface);border:1px solid var(--stroke);border-radius:3px;padding:15px}
+.system-card b{color:var(--ink);font-size:13px}.system-card small{color:var(--muted);font-size:12px;line-height:1.4}
+.unit-label {font-size:10px;letter-spacing:.08em;color:var(--muted);text-align:left;margin:16px 3px 0}
+.unit-label span{color:var(--accent)}
+.main-area {margin-left:264px}
+/* Верхняя панель — визуальная иерархия: контекст / название / состояние */
+.topbar {min-height:120px;padding:23px 32px;background:var(--surface);border-bottom:1px solid var(--stroke);gap:22px}
+.breadcrumb {font-family:Consolas,monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);font-weight:700}
+.breadcrumb-mark{color:var(--accent);margin-right:7px}.breadcrumb-separator{color:var(--stroke-strong);padding:0 7px}
+.topbar h1 {font-size:clamp(25px,2.1vw,36px);line-height:1.1;font-weight:750;letter-spacing:-.045em;color:var(--ink);margin-top:10px}
+.topbar p{color:var(--muted);font-size:13px;line-height:1.5;margin-top:7px}
+.top-right {gap:12px}
+.theme-toggle {background:var(--surface-raised);color:var(--ink);border:1px solid var(--stroke-strong);border-radius:3px;font-weight:650;padding:10px 14px;min-height:43px}
+.theme-toggle:hover{background:var(--accent-soft);border-color:var(--accent)}
+.plant-state {background:var(--surface-raised);border:1px solid var(--stroke);border-radius:3px;padding:10px 12px}
+.plant-state b,.instructor-meta b{color:var(--ink)}.plant-state small,.instructor-meta small{color:var(--muted)}
+.instructor-mark{background:var(--accent-soft);color:var(--accent);border:1px solid var(--stroke-strong);border-radius:3px}
+.content {padding:30px 32px 56px}
+/* Информационные панели — различаем секции по структуре, не по градиенту */
+.panel {background:var(--surface);border:1px solid var(--stroke);border-radius:3px;box-shadow:none;overflow:hidden}
+.panel-head {padding:15px 19px;border-bottom:1px solid var(--stroke);background:var(--surface-raised)}
+.panel-head h3,.section-title h2 {color:var(--ink);letter-spacing:-.02em}
+.panel-line {background:var(--accent);width:3px;border-radius:0}
+.section-title p,.telemetry-label,.telemetry-range {color:var(--muted)}
+.telemetry-card {position:relative;overflow:hidden;border:1px solid var(--stroke);border-radius:3px;box-shadow:none;background:var(--surface);padding:18px 16px 15px;min-width:0}
+.telemetry-card:before {top:0;left:0;width:3px;height:100%;background:var(--accent);right:auto}
+.telemetry-label {font-size:11px;line-height:1.35;letter-spacing:.03em;min-height:32px}
+.telemetry-value {font-family:Consolas,"Segoe UI",monospace;font-size:clamp(23px,2.2vw,32px);font-weight:700;letter-spacing:-.055em;color:var(--ink);white-space:normal;overflow-wrap:anywhere}
+.telemetry-value small {font-family:"Segoe UI",Arial,sans-serif;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0}
+.telemetry-range {font-size:11px}
+/* Кнопки: контрастные состояния в обеих темах */
+.primary,.primary:hover {background:var(--accent);border-color:var(--accent);color:var(--accent-ink);text-shadow:none}
+.primary:hover{filter:brightness(.94)}
+.primary *, .primary:hover * {color:inherit}
+.ghost,.table-action {background:var(--surface-raised);color:var(--ink);border:1px solid var(--stroke-strong)}
+.ghost:hover,.table-action:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--accent)}
+button:disabled{opacity:.6;cursor:not-allowed}
+input,select,textarea,.form-block select,.form-block input {background:var(--surface);color:var(--ink);border:1px solid var(--stroke-strong);border-radius:3px}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+.mode-switch button,.difficulty-switch button,.scenario-options button,.instructor-actions>button:not(.mock-action),.journal-filters button,.timeline-card,.live-bar,.connected-operator {background:var(--surface);border-color:var(--stroke);color:var(--ink);border-radius:3px}
+.mode-switch button.active,.difficulty-switch button.active,.scenario-options button.active,.journal-filters button.active {background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.mode-switch span,.scenario-options b,.instructor-actions button b,.connected-operator b,.timeline-card b {color:var(--ink)}
+.mode-switch small,.scenario-options span,.form-block>label,.scenario-grid p,.scenario-passport p,.journal-context small,.timeline-card span {color:var(--muted)}
+.journal-context,.event-modal {background:var(--surface);border-color:var(--stroke);box-shadow:none;border-radius:3px}
+.journal-context div,.journal-filters {border-color:var(--stroke)}
+.event-modal>button:not(.ghost) {background:var(--surface-raised);color:var(--ink);border-color:var(--stroke)}
+.event-modal p {color:var(--muted)}
+th {background:var(--surface-raised);color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+th,td {border-color:var(--stroke)}td,td b {color:var(--ink)}
+.result-cards>div,.scenario-grid article {background:var(--surface);border:1px solid var(--stroke);border-radius:3px;box-shadow:none}
+.result-cards b,.summary-values b,.scenario-grid h3,.scenario-passport h3 {color:var(--ink)}
+.result-cards small,.result-cards span,.summary-values span {color:var(--muted)}
+.mimic {background:var(--surface)}.mimic-title{color:var(--muted)}
+.unit:not(.scram):not(.offline){background:var(--surface-raised);border-color:var(--stroke-strong);box-shadow:none;border-radius:3px}
+.unit:not(.scram):not(.offline)>b{color:var(--ink)}
+.unit:not(.scram):not(.offline)>span,.unit:not(.scram):not(.offline)>i{color:var(--muted)}
+.pump:not(.off){background:var(--surface-raised);border-color:var(--stroke-strong);color:var(--success-ink);border-radius:3px}
+.pump:not(.off)>b{color:var(--ink)}.pump:not(.off)>span{color:var(--muted)}
+.live-bar {background:var(--surface);border:1px solid var(--stroke);border-left:3px solid var(--accent)}
+.live-bar span{color:var(--muted)}.live-bar strong{color:var(--ink)}
+.instructor-actions>p{color:var(--muted)}
+.instructor-actions>button:not(.mock-action){background:var(--surface-raised);color:var(--ink);border:1px solid var(--stroke)}
+.instructor-actions>button:not(.mock-action):hover{background:var(--accent-soft);border-color:var(--accent)}
+.instructor-actions button b{color:var(--ink)}.instructor-actions button i{color:var(--muted)}
+.reset-btn{background:var(--surface-raised);border-color:var(--stroke-strong);color:var(--ink)}
+.reset-btn:hover{background:var(--accent-soft);color:var(--ink)}
+/* Предупреждения и аварии — семантические, контрастные */
+:root[data-theme="light"] .az-btn {background:#fbe5e3;border-color:#bd4c45;color:#8d1d20}
+:root[data-theme="light"] .az-btn:hover{background:#f6ceca;color:#761619}
+:root[data-theme="light"] .annunciator-banner{background:#fff3df;border-color:#ac741f}
+:root[data-theme="light"] .annunciator-banner-title{color:#79500c}
+:root[data-theme="light"] .alarm-pill.crit{background:#fce6e5;border-color:#c9514d;color:#8b1c23}
+:root[data-theme="light"] .alarm-pill.crit b{color:#9d252a}
+:root[data-theme="light"] .alarm-pill.warn{background:#fff0d6;border-color:#c28b31;color:#73500f}
+:root[data-theme="light"] .alarm-pill.warn b{color:#73500f}
+:root[data-theme="light"] .unit.scram{background:#fbe6e5;border-color:#c84d49;box-shadow:none}
+:root[data-theme="light"] .unit.scram>b,:root[data-theme="light"] .unit.scram>i{color:#93242a}
+:root[data-theme="light"] .unit.offline{background:#fff1d8;border-color:#b9832d}
+:root[data-theme="light"] .unit.offline>b,:root[data-theme="light"] .unit.offline>i{color:#74500e}
+:root[data-theme="light"] .pump.off{background:#fff0d6;border-color:#b9832d;color:#74500e}
+:root[data-theme="light"] .pump.off>span{color:#74500e}
+:root[data-theme="light"] .status-badge.normal{background:#e1f3e7;border-color:#94c5a5;color:#165b38}
+:root[data-theme="light"] .status-badge.live{background:#e1eff5;border-color:#a3c4d2;color:#20576e}
+:root[data-theme="light"] .status-badge.warning{background:#fff0d6;border-color:#d2ae6b;color:#785009}
+:root[data-theme="light"] .status-badge.danger{background:#fbe4e4;border-color:#dda5a5;color:#942b32}
+:root[data-theme="light"] .reactor-gauge{border-color:#b7c6ca;border-top-color:#9a5d12;border-right-color:#9a5d12}
+/* Все ссылки и акцентные элементы должны быть различимы на светлом фоне */
+:root[data-theme="light"] a {color:#75500f}
+:root[data-theme="light"] .primary, :root[data-theme="light"] .primary * {color:#fff}
+:root[data-theme="light"] .telemetry-card, :root[data-theme="light"] .panel {color:var(--ink)}
+@media(max-width:1380px){.instructor-meta{display:none}.topbar{gap:14px}}
+@media(max-width:1100px){.sidebar{width:228px}.main-area{margin-left:228px}.content{padding:22px}.topbar{padding:20px 22px}.plant-state small{display:none}}
+@media(max-width:900px){.topbar{flex-wrap:wrap}.top-right{width:100%;justify-content:flex-start}.telemetry-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}

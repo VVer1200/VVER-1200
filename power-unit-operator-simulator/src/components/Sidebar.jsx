@@ -1,47 +1,38 @@
+// Назначение файла: Боковая навигация по разделам панели инструктора.
 import React from 'react';
 import './Sidebar.css';
 import ReactorLogo from './ReactorLogo';
-
+import UiIcon from './UiIcon';
 const navigation = [
-  ['dashboard', '▦', 'Главная'],
-  ['create', '＋', 'Планирование'],
-  ['live', '◌', 'Мониторинг'],
-  ['journal', '≡', 'Журнал действий'],
-  ['results', '▤', 'Результаты'],
-  ['scenarios', '◇', 'Сценарии'],
+    ['dashboard', 'dashboard', 'Обзор энергоблока'],
+    ['create', 'plus', 'Новая сессия'],
+    ['live', 'activity', 'Мониторинг'],
+    ['journal', 'list', 'Журнал действий'],
+    ['results', 'chart', 'Результаты'],
+    ['scenarios', 'layers', 'Сценарии'],
 ];
-
 export default function Sidebar({ page, setPage, connectionStatus = 'disconnected' }) {
-  const statusLabels = {
-    connected: ['Симулятор онлайн', 'Телеметрия 20 Гц (ВВЭР-1200)'],
-    connecting: ['Подключение...', 'ws://localhost:3000'],
-    disconnected: ['Симулятор: нет связи', 'Запустите сервер (порт 3000)'],
-  };
-
-  const [statusTitle, statusSub] = statusLabels[connectionStatus] || statusLabels.disconnected;
-
-  return (
-    <aside className="sidebar">
+    const statusLabels = {
+        connected: ['Симулятор онлайн', 'Телеметрия 20 Гц (ВВЭР-1200)'],
+        connecting: ['Подключение...', 'ws://localhost:3000'],
+        disconnected: ['Симулятор: нет связи', 'Запустите сервер (порт 3000)'],
+    };
+    const [statusTitle, statusSub] = statusLabels[connectionStatus] || statusLabels.disconnected;
+    return (<aside className="sidebar">
       <div className="sidebar-brand">
         <ReactorLogo />
       </div>
       <div className="role-tag">ПАНЕЛЬ ИНСТРУКТОРА БЩУ</div>
       <nav>
-        {navigation.map(([id, icon, text]) => (
-          <button
-            key={id}
-            className={page === id ? 'active' : ''}
-            onClick={() => setPage(id)}
-          >
-            <span>{icon}</span>
+        {navigation.map(([id, icon, text]) => (<button key={id} className={page === id ? 'active' : ''} onClick={() => setPage(id)}>
+            <span className="nav-icon"><UiIcon name={icon} size={19}/></span>
             <b>{text}</b>
             {id === 'live' && <i />}
-          </button>
-        ))}
+          </button>))}
       </nav>
       <div className="side-system">
         <div className="system-card">
-          <span className={`status-dot ${connectionStatus}`} />
+          <span className={`status-dot ${connectionStatus}`}/>
           <div>
             <b>{statusTitle}</b>
             <small>{statusSub}</small>
@@ -49,6 +40,6 @@ export default function Sidebar({ page, setPage, connectionStatus = 'disconnecte
         </div>
         <div className="unit-label">ЛАЭС · ЭНЕРГОБЛОК ВВЭР-1200</div>
       </div>
-    </aside>
-  );
+    </aside>);
 }
+
