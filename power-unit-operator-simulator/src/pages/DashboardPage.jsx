@@ -1,129 +1,47 @@
-import React from 'react';
+// Назначение файла: Главный обзор энергоблока: показатели, мнемосхема и события.
+import React, { useState } from 'react';
 import './DashboardPage.css';
-import Panel from '../components/Panel';
 import StatusBadge from '../components/StatusBadge';
 import EventRow from '../components/EventRow';
 import PlantMimic from '../components/PlantMimic';
-import TelemetryCard from '../components/TelemetryCard';
 import { formatTime } from '../utils/formatters';
-
 export default function DashboardPage({ session, operator, scenario, journal, telemetry, setPage, connectionStatus = 'disconnected' }) {
-  const freqFormatted = typeof telemetry.freq === 'number' ? telemetry.freq.toFixed(2) : (telemetry.freq || '50.00');
-
-  return (
-    <>
-      <div className="section-title">
-        <div>
-          <h2>Текущее состояние энергоблока</h2>
-          <p>
-            {connectionStatus === 'connected'
-              ? 'Математическая модель ВВЭР-1200 подключена · частота обновления 20 Гц'
-              : 'Основные технологические параметры учебной модели ВВЭР-1200'}
-          </p>
+    const [immersive, setImmersive] = useState(true);
+    const freqFormatted = typeof telemetry.freq === 'number' ? telemetry.freq.toFixed(2) : (telemetry.freq || '50.00');
+    const power = Number(telemetry.power) || 0;
+    // Готовим измерительные каналы и состояния предупреждений для отображения.
+    const readings = [
+        ['Давление I контура', telemetry.primaryPressure, 'МПа', '15.5–16.6', telemetry.primaryPressure > 16.6 || telemetry.primaryPressure < 15 ? 'warning' : 'normal'],
+        ['Температура на выходе АЗ', telemetry.outletTemp, '°C', 'до 335', telemetry.outletTemp > 330 ? 'warning' : 'normal'],
+        ['Уровень парогенератора', telemetry.sgLevel, 'м', '2.2–2.6', telemetry.sgLevel < 2.2 || telemetry.sgLevel > 2.6 ? 'warning' : 'normal'],
+        ['Электрическая мощность', telemetry.electric, 'МВт', 'генератор', !telemetry.gridBreakerClosed ? 'danger' : 'normal'],
+        ['Частота генератора', freqFormatted, 'Гц', '50.00', 'normal'],
+    ];
+    return (<div className="workspace dashboard-workspace">
+      <div className="workspace-kicker"><span className="serial-number">01 / ОБЗОР</span><span>ТЕХНОЛОГИЧЕСКОЕ СОСТОЯНИЕ · ВВЭР-1200</span></div>
+      <section className={`command-hero neon-hero ${immersive ? "immersive-on" : "immersive-off"}`}>
+        <div className="hero-copy">
+          <span className="eyebrow">● ЦЕНТР КОНТРОЛЯ / ЭНЕРГОБЛОК</span>
+          <h2>Энергия.<br /><em>Точность.</em><br />Контроль.</h2>
+          <p>{connectionStatus === 'connected' ? 'Получаем телеметрию математической модели в реальном времени.' : 'Панель контроля учебной модели. Для реальной телеметрии подключите сервер.'}</p>
+          <div className="hero-actions"><button className="primary" onClick={() => setPage('live')}>Открыть пульт мониторинга </button><button className="ghost" onClick={() => setPage('create')}>Новая сессия +</button></div>
         </div>
-        <button className="primary" onClick={() => setPage('create')}>＋ ЗАПЛАНИРОВАТЬ СЕССИЮ</button>
+        <div className={`hero-reactor hologram-stage ${telemetry.scramActive ? 'reactor-alert' : ''}`}>
+          <img className="reactor-art" src="/assets/reactor-hologram.webp" alt="Голографическая иллюстрация реакторной установки"/>
+          <div className="hologram-scan" aria-hidden="true"/>
+          <button type="button" className="visual-motion-toggle" onClick={() => setImmersive(v => !v)} aria-pressed={immersive}>{immersive ? "◉ АНИМАЦИЯ ВКЛ" : "◎ АНИМАЦИЯ ВЫКЛ"}</button>
+          
+          <div className="reactor-core"><span>МОЩНОСТЬ РЕАКТОРА</span><strong>{telemetry.power}<small>%</small></strong><span>{telemetry.scramActive ? 'АЗ-1 АКТИВНА' : 'N / NНОМ'}</span></div>
+          <span className="orbit-label orbit-label-top">VVER—1200</span><span className="orbit-label orbit-label-bottom">{telemetry.scramActive ? 'АВАРИЙНАЯ ЗАЩИТА' : power < 95 ? 'ОТКЛОНЕНИЕ МОЩНОСТИ' : 'НОМИНАЛЬНЫЙ РЕЖИМ'}</span>
+        </div>
+      </section>
+      <div className="section-heading"><div><span className="section-index">01.1</span><h3>Параметры энергоблока</h3></div><span className="section-meta">{telemetry.isRealData ? 'МОДЕЛЬ ПОДКЛЮЧЕНА' : 'НЕТ СВЯЗИ С МОДЕЛЬЮ'}</span></div>
+      <section className="instrument-strip">{readings.map(([label, value, unit, range, state], i) => <div className={`instrument ${state}`} key={label}><div className="instrument-top"><span>{String(i + 1).padStart(2, '0')}</span><i /></div><div className="instrument-label">{label}</div><div className="instrument-value">{value}<small>{unit}</small></div><div className="instrument-foot">Ориентир: {range}</div></div>)}</section>
+      <div className="dashboard-main-grid">
+        <section className="schematic-stage"><div className="stage-heading"><div><span className="eyebrow">02 / МНЕМОСХЕМА</span><h3>Технологическая цепочка</h3></div><span className="stage-chip">ПРИНЦИПИАЛЬНАЯ СХЕМА</span></div><PlantMimic telemetry={telemetry}/></section>
+        <section className="session-stage"><div className="stage-heading"><div><span className="eyebrow">03 / СЕССИЯ</span><h3>Рабочая смена</h3></div><StatusBadge type="live">● LIVE</StatusBadge></div><div className="session-identity"><span className="operator-avatar">OP</span><div><strong>{operator.name}</strong><span>{operator.group} · оператор энергоблока</span></div></div><div className="session-details"><div><span>Режим</span><b>{session.mode}</b></div><div><span>Сценарий</span><b>{scenario.short}</b></div><div><span>Сложность</span><b>{session.difficulty}</b></div><div><span>Время</span><b className="mono">{formatTime(session.elapsed)}</b></div></div><button className="session-link" onClick={() => setPage('live')}>Перейти к управлению </button></section>
       </div>
-
-      <div className="dashboard-telemetry">
-        <TelemetryCard
-          label="Мощность реактора"
-          value={telemetry.power}
-          unit="%"
-          range="Рабочий диапазон 95–105%"
-          state={telemetry.scramActive ? 'danger' : telemetry.power < 95 ? 'warning' : 'normal'}
-        />
-        <TelemetryCard
-          label="Давление I контура"
-          value={telemetry.primaryPressure}
-          unit="МПа"
-          range="Норма 15.5–16.6 МПа"
-          state={telemetry.primaryPressure > 16.6 || telemetry.primaryPressure < 15.0 ? 'warning' : 'normal'}
-        />
-        <TelemetryCard
-          label="T на выходе активной зоны"
-          value={telemetry.outletTemp}
-          unit="°C"
-          range="Предельное значение 335°C"
-          state={telemetry.outletTemp > 330 ? 'warning' : 'normal'}
-        />
-        <TelemetryCard
-          label="Уровень в парогенераторе"
-          value={telemetry.sgLevel}
-          unit="м"
-          range="Норма 2.2–2.6 м"
-          state={telemetry.sgLevel < 2.2 || telemetry.sgLevel > 2.6 ? 'warning' : 'normal'}
-        />
-        <TelemetryCard
-          label="Электрическая мощность"
-          value={telemetry.electric}
-          unit="МВт"
-          range={telemetry.gridBreakerClosed ? 'Генератор подключен к сети' : 'ОТКЛЮЧЕН ОТ СЕТИ'}
-          state={!telemetry.gridBreakerClosed ? 'danger' : 'normal'}
-        />
-        <TelemetryCard
-          label="Частота генератора"
-          value={freqFormatted}
-          unit="Гц"
-          range="Номинальная частота 50 Гц"
-        />
-      </div>
-
-      <div className="grid-2 mt">
-        <Panel title="Активная учебная сессия" meta={<StatusBadge type="live">● LIVE</StatusBadge>}>
-          <div className="active-session">
-            <div className="operator-head">
-              <div className="operator-symbol">OP</div>
-              <div className="operator-copy">
-                <b>{operator.name}</b>
-                <span>{operator.group} · оператор энергоблока</span>
-              </div>
-              <button className="ghost" onClick={() => setPage('live')}>Открыть мониторинг</button>
-            </div>
-            <div className="session-kpi">
-              <div><small>Режим</small><b>{session.mode}</b></div>
-              <div><small>Сложность</small><b>{session.difficulty}</b></div>
-              <div><small>Сценарий</small><b>{scenario.short}</b></div>
-              <div><small>Время</small><b className="mono">{formatTime(session.elapsed)}</b></div>
-            </div>
-          </div>
-        </Panel>
-
-        <Panel
-          title="Контроль состояния"
-          meta={
-            <StatusBadge type={telemetry.scramActive ? 'danger' : telemetry.power < 95 ? 'warning' : 'normal'}>
-              {telemetry.scramActive
-                ? 'АЗ-1: СБРОС СТЕРЖНЕЙ'
-                : telemetry.power < 95
-                ? 'ОТКЛОНЕНИЕ ПАРАМЕТРА'
-                : 'ПАРАМЕТРЫ СТАБИЛЬНЫ'}
-            </StatusBadge>
-          }
-        >
-          <div className="reactor-summary">
-            <div className="reactor-gauge">
-              <b>{telemetry.power}%</b>
-              <span>мощность реактора</span>
-            </div>
-            <div className="summary-values">
-              <p><span>Давление I контура</span><b>{telemetry.primaryPressure} МПа</b></p>
-              <p><span>Температура на выходе АЗ</span><b>{telemetry.outletTemp} °C</b></p>
-              <p><span>Частота сети</span><b>{freqFormatted} Гц</b></p>
-            </div>
-          </div>
-        </Panel>
-      </div>
-
-      <div className="grid-2 mt">
-        <Panel title="Технологическая схема энергоблока">
-          <PlantMimic telemetry={telemetry} />
-        </Panel>
-        <Panel title="Последние события" meta={<button className="dash-link" onClick={() => setPage('journal')}>Открыть журнал</button>}>
-          <div className="events-wrap">
-            {journal.slice(-5).reverse().map((event, index) => <EventRow event={event} key={`${event.time}-${index}`} />)}
-          </div>
-        </Panel>
-      </div>
-    </>
-  );
+      <section className="activity-stage"><div className="stage-heading"><div><span className="eyebrow">04 / ЖУРНАЛ</span><h3>Последние события</h3></div><button className="text-action" onClick={() => setPage('journal')}>Все события</button></div><div className="activity-list">{journal.slice(-4).reverse().map((event, i) => <EventRow event={event} key={`${event.time}-${i}`}/>)}</div></section>
+    </div>);
 }
+

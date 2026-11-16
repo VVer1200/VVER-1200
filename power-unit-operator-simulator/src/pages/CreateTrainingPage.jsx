@@ -1,107 +1,18 @@
+// Назначение файла: Конструктор учебной сессии с выбором режима и сценария.
 import React, { useState } from 'react';
 import './CreateTrainingPage.css';
-import Panel from '../components/Panel';
-
-export default function CreateTrainingPage({ scenarios, onStart }) {
-  const [mode, setMode] = useState('Тренировка');
-  const [difficulty, setDifficulty] = useState('Средняя');
-  const [scenarioId, setScenarioId] = useState('rcp');
-  const [plannedDate, setPlannedDate] = useState('2026-09-15');
-  const [plannedTime, setPlannedTime] = useState('14:00');
-  const scenario = scenarios.find((item) => item.id === scenarioId);
-
-  return (
-    <div className="create-layout">
-      <Panel title="Параметры учебной сессии">
-        <div className="create-form">
-          <div className="form-block">
-            <label>01 · Режим проведения</label>
-            <div className="mode-switch">
-              {['Тренировка', 'Экзамен'].map((item) => (
-                <button className={mode === item ? 'active' : ''} onClick={() => setMode(item)} key={item}>
-                  <b>{item === 'Тренировка' ? '◌' : '✓'}</b>
-                  <span>
-                    {item}
-                    <small>{item === 'Тренировка' ? 'Допускаются подсказки и вмешательство инструктора' : 'Полная фиксация действий без подсказок оператору'}</small>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-block">
-              <label>02 · Подключение оператора</label>
-              <div className="connected-operator">
-                <span className="connected-dot" />
-                <div>
-                  <b>Оператор подключён через Unity</b>
-                  <small>Рабочее место оператора · компьютер №1</small>
-                </div>
-              </div>
-            </div>
-            <div className="form-block">
-              <label>03 · Дата и время</label>
-              <div className="date-time-row">
-                <input type="date" value={plannedDate} onChange={(event) => setPlannedDate(event.target.value)} />
-                <input type="time" value={plannedTime} onChange={(event) => setPlannedTime(event.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          <div className="form-block">
-            <label>04 · Уровень сложности</label>
-            <div className="difficulty-switch">
-              {['Начальная', 'Средняя', 'Сложная', 'Экспертная'].map((item) => (
-                <button className={difficulty === item ? 'active' : ''} onClick={() => setDifficulty(item)} key={item}>{item}</button>
-              ))}
-            </div>
-          </div>
-
-          <div className="form-block">
-            <label>05 · Учебный сценарий</label>
-            <div className="scenario-options">
-              {scenarios.map((item) => (
-                <button className={scenarioId === item.id ? 'active' : ''} key={item.id} onClick={() => setScenarioId(item.id)}>
-                  <i>{item.category}</i>
-                  <b>{item.title}</b>
-                  <span>{item.description}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="session-submit">
-            <div>
-              <small>Запланировано</small>
-              <b>{plannedDate} · {plannedTime}</b>
-            </div>
-            <button className="primary start-btn" onClick={() => onStart({ mode, operatorId: 1, difficulty, scenarioId, plannedDate, plannedTime })}>
-              ▶ ЗАПУСТИТЬ {mode.toUpperCase()}
-            </button>
-          </div>
-        </div>
-      </Panel>
-
-      <aside className="create-aside">
-        <Panel title="Паспорт сценария">
-          <div className="scenario-passport">
-            <div className="passport-icon">⚛</div>
-            <small>{scenario.category}</small>
-            <h3>{scenario.title}</h3>
-            <p>{scenario.description}</p>
-            <dl>
-              <div><dt>Рекомендуемая сложность</dt><dd>{scenario.level}</dd></div>
-              <div><dt>Контроль действий</dt><dd>Полный журнал событий</dd></div>
-              <div><dt>Источник данных</dt><dd>Unity / симулятор энергоблока</dd></div>
-            </dl>
-          </div>
-        </Panel>
-        <div className={`exam-note ${mode === 'Экзамен' ? 'show' : ''}`}>
-          <b>ЭКЗАМЕНАЦИОННЫЙ РЕЖИМ</b>
-          <p>Все действия оператора, изменения параметров, сигнализации и вмешательства инструктора сохраняются для последующего разбора.</p>
-        </div>
-      </aside>
-    </div>
-  );
+import UiIcon from '../components/UiIcon';
+export default function CreateTrainingPage({ scenarios = [], onStart }) {
+    const [mode, setMode] = useState('Тренировка'), [difficulty, setDifficulty] = useState('Средняя'), [scenarioId, setScenarioId] = useState(scenarios[0]?.id || 'rcp');
+    const [plannedDate, setPlannedDate] = useState(() => new Date().toISOString().slice(0, 10)), [plannedTime, setPlannedTime] = useState('14:00');
+    const scenario = scenarios.find(s => s.id === scenarioId) || scenarios[0];
+    return <div className="ux-page">
+ <header className="ux-heading"><div><span className="ux-eyebrow">SESSION BUILDER / 01</span><h2>Конструктор учебной сессии</h2><p>Настройте параметры и выберите испытание для оператора</p></div><div className="ux-heading-symbol"><UiIcon name="shield" size={34}/></div></header>
+ <div className="ux-builder-grid"><div className="ux-builder-main">
+ <section className="ux-surface"><div className="ux-section-head"><span className="ux-step">01</span><div><h3>Режим проведения</h3><p>Определяет формат учебного занятия</p></div></div><div className="ux-mode-grid">{[['Тренировка', 'activity', 'С подсказками и вмешательством инструктора'], ['Экзамен', 'shield', 'Фиксация действий без подсказок']].map(([m, icon, desc]) => <button key={m} className={`ux-mode ${mode === m ? 'selected' : ''}`} onClick={() => setMode(m)}><UiIcon name={icon} size={25}/><strong>{m}</strong><span>{desc}</span><span className="ux-select-indicator"><UiIcon name="check" size={14}/></span></button>)}</div></section>
+ <section className="ux-surface"><div className="ux-section-head"><span className="ux-step">02</span><div><h3>Сложность испытания</h3><p>Выберите уровень подготовки оператора</p></div></div><div className="ux-difficulty">{['Начальная', 'Средняя', 'Сложная', 'Экспертная'].map((d, i) => <button key={d} className={difficulty === d ? 'selected' : ''} onClick={() => setDifficulty(d)}><span className="ux-difficulty-bars">{[0, 1, 2, 3].map(j => <i key={j} className={j <= i ? 'lit' : ''}/>)}</span>{d}</button>)}</div></section>
+ <section className="ux-surface"><div className="ux-section-head"><span className="ux-step">03</span><div><h3>Сценарий тренировки</h3><p>Нажмите на сценарий, чтобы увидеть его паспорт справа</p></div></div><div className="ux-scenario-choices">{scenarios.map((sc, i) => <button key={sc.id} className={scenarioId === sc.id ? 'selected' : ''} onClick={() => setScenarioId(sc.id)}><span className="ux-scenario-index">{String(i + 1).padStart(2, '0')}</span><span><strong>{sc.short || sc.title}</strong><small>{sc.category}</small></span><UiIcon name="chevron" size={17}/></button>)}</div></section>
+ <section className="ux-surface ux-schedule"><div className="ux-section-head"><span className="ux-step">04</span><div><h3>Планирование</h3><p>Параметры начала учебной сессии</p></div></div><div className="ux-fields"><label>Дата<input type="date" value={plannedDate} onChange={e => setPlannedDate(e.target.value)}/></label><label>Время<input type="time" value={plannedTime} onChange={e => setPlannedTime(e.target.value)}/></label></div></section>
+ </div><aside className="ux-builder-aside"><div className="ux-passport"><div className="ux-passport-art"><img src="/assets/reactor-hologram.webp" alt="Голографическая визуализация реактора"/><span>SCENARIO / {scenario?.id?.toUpperCase()}</span></div><div className="ux-passport-content"><span className="ux-eyebrow">ПАСПОРТ СЦЕНАРИЯ</span><h3>{scenario?.title || 'Сценарий не выбран'}</h3><p>{scenario?.description}</p><div className="ux-passport-row"><span>Категория</span><strong>{scenario?.category}</strong></div><div className="ux-passport-row"><span>Сложность сценария</span><strong>{scenario?.level}</strong></div><div className="ux-passport-row"><span>Режим</span><strong>{mode}</strong></div></div></div><div className="ux-launch"><div className="ux-operator-line"><UiIcon name="info" size={18}/><span>Подключение оператора проверяется в мониторинге; эта форма не подтверждает наличие связи с Unity.</span></div><button className="ux-primary ux-action-centered" onClick={() => onStart({ mode, operatorId: 1, difficulty, scenarioId, plannedDate, plannedTime })}><UiIcon name="play" size={19}/> Запустить {mode.toLowerCase()}</button></div></aside></div></div>;
 }
+

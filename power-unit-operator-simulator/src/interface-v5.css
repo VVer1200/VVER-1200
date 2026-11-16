@@ -1,0 +1,52 @@
+/* V5: focused alignment fixes for action buttons and telemetry */
+.ux-primary.ux-action-centered,
+.mock-action.ux-action-centered {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  text-align: center !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ux-primary.ux-action-centered > svg,
+.mock-action.ux-action-centered > svg {
+  display: block;
+  flex: 0 0 auto;
+  margin: 0 !important;
+  position: static !important;
+  transform: none !important;
+  vertical-align: middle;
+}
+/* Prevent the original 'last icon floats right' rule from shifting CTA content. */
+.ux-primary.ux-action-centered svg:last-child { margin-left: 0 !important; }
+/* Keep telemetry detail text away from the expand/collapse control. */
+.telemetry-card.instrument-interactive { position: relative; }
+.telemetry-card.instrument-interactive .telemetry-details {
+  padding-right: 48px !important;
+  min-height: 40px;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.telemetry-card.instrument-interactive .telemetry-details b {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.telemetry-card.instrument-interactive .instrument-expand {
+  position: absolute !important;
+  top: auto !important;
+  right: 14px !important;
+  bottom: 13px !important;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .telemetry-card.instrument-interactive .telemetry-details { padding-right: 44px !important; }
+}
